@@ -1,0 +1,45 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: tcpdump-svc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tcpdump-svc
+  template:
+    metadata:
+      labels:
+        app: tcpdump-svc
+    spec:
+      containers:
+      - name: tcpdump-svc
+        image: nnao45/tcpdump
+        livenessProbe:
+          httpGet: # make an HTTP request
+            port: 80 # port to use
+            path: / # endpoint to hit
+            scheme: HTTP # or HTTPS
+          initialDelaySeconds: 5 # how long to wait before checking
+          periodSeconds: 5 # how long to wait between checks
+          successThreshold: 1 # how many successes to hit before accepting
+          failureThreshold: 3 # how many failures to accept before failing
+          timeoutSeconds: 10 # how long to wait for a response
+        ports:
+        - name: http
+          containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tcpdump-svc
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: tcpdump-svc
+  type: LoadBalancer

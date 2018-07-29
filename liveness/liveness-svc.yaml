@@ -1,0 +1,45 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: liveness-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: liveness-svc
+  template:
+    metadata:
+      labels:
+        app: liveness-svc
+    spec:
+      containers:
+      - name: liveness-svc
+        image: nnao45/liveness
+        livenessProbe:
+          httpGet: # make an HTTP request
+            port: 8080 # port to use
+            path: / # endpoint to hit
+            scheme: HTTP # or HTTPS
+          initialDelaySeconds: 5 # how long to wait before checking
+          periodSeconds: 1 # how long to wait between checks
+          successThreshold: 1 # how many successes to hit before accepting
+          failureThreshold: 1 # how many failures to accept before failing
+          timeoutSeconds: 1 # how long to wait for a response
+        ports:
+        - name: http
+          containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: liveness-svc
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: liveness-svc
+  type: LoadBalancer
