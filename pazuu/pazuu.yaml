@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pazuu
+  namespace: default
+spec:
+  containers:
+  - image: nnao45/pazuu
+    name: pazuu
+    ports:
+      - containerPort: 8080
+  restartPolicy: Always

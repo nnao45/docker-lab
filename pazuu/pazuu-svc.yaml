@@ -1,0 +1,35 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: pazuu-svc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pazuu-svc
+  template:
+    metadata:
+      labels:
+        app: pazuu-svc
+    spec:
+      containers:
+      - name: pazuu-svc
+        image: nnao45/pazuu
+        ports:
+        - name: http
+          containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pazuu-svc
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: pazuu-svc
+  type: LoadBalancer
