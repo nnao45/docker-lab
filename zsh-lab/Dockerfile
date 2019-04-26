@@ -1,7 +1,7 @@
 FROM centos:7.6.1810 as builder
 
 RUN yum -y groupinstall 'Development tools'
-RUN yum -y install git
+RUN yum -y install git man latex2html
 RUN mkdir /src
 COPY icmake /src/icmake
 WORKDIR /src/icmake/icmake
@@ -9,13 +9,16 @@ RUN ./icm_bootstrap /
 RUN ./icm_install strip all /
 
 COPY yodl-3.03.0 /src/yodl-3.03.0
+RUN yum -y install texlive-epsf
 WORKDIR /src/yodl-3.03.0
 RUN ./build programs
 RUN ./build man
 RUN ./build macros
+RUN ./build manual
 RUN ./build install programs /
 RUN ./build install man /
 RUN ./build install macros /
+RUN ./build install manual /
 RUN ./build install docs /
 
 RUN git clone git://git.code.sf.net/p/zsh/code /src/zsh
@@ -34,9 +37,11 @@ WORKDIR /src/zsh
 RUN porg -lD make install
 
 FROM centos:7.6.1810
+RUN yum -y install man
 ADD .zshrc /root
 COPY --from=builder /usr/local/bin/zsh /usr/local/bin/zsh
 COPY --from=builder /usr/local/lib/zsh/5.7.1-dev-0 /usr/local/lib/zsh/5.7.1-dev-0
 COPY --from=builder /usr/local/share/zsh/5.7.1-dev-0 /usr/local/share/zsh/5.7.1-dev-0
+COPY --from=builder /usr/local/share/man/man1 /usr/local/share/man/man1
 WORKDIR /root/
 CMD ["/usr/local/bin/zsh"]
